@@ -39,15 +39,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Used socket activated port in advertised URLs, if applicable
-	if socketActivated() {
-		config.Peer.Addr = useActivatedPort(info.RaftURL, raftSock)
-		config.Addr = useActivatedPort(info.EtcdURL, etcdSock)
-
-		config.Peer.BindAddr = ":" + getActivatedPort(raftSock)
-		config.BindAddr = ":" + getActivatedPort(etcdSock)
-	}
-
 	var etcd = etcd.New(config)
 	etcd.Run()
 }

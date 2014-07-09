@@ -71,6 +71,16 @@ func New(c *config.Config) *Etcd {
 	if c == nil {
 		c = config.New()
 	}
+
+	// Used socket activated port in advertised URLs, if applicable
+	if socketActivated() {
+		c.Peer.Addr = useActivatedPort(info.RaftURL, raftSock)
+		c.Addr = useActivatedPort(info.EtcdURL, etcdSock)
+
+		c.Peer.BindAddr = ":" + getActivatedPort(raftSock)
+		c.BindAddr = ":" + getActivatedPort(etcdSock)
+	}
+
 	return &Etcd{
 		Config:      c,
 		closeChan:   make(chan bool),
