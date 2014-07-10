@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"crypto/tls"
@@ -39,12 +39,12 @@ func init() {
 	}
 }
 
-func socketActivated() bool {
+func SocketActivated() bool {
 	return activatedSockets != nil
 }
 
 func ActivateListenAndServe(srv *http.Server, sockno int) error {
-	if !socketActivated() {
+	if !SocketActivated() {
 		return srv.ListenAndServe()
 	} else {
 		return srv.Serve(activatedSockets[sockno])
@@ -52,7 +52,7 @@ func ActivateListenAndServe(srv *http.Server, sockno int) error {
 }
 
 func ActivateListenAndServeTLS(srv *http.Server, sockno int, certFile, keyFile string) error {
-	if !socketActivated() {
+	if !SocketActivated() {
 		return srv.ListenAndServeTLS(certFile, keyFile)
 	} else {
 		config := &tls.Config{}
@@ -75,7 +75,7 @@ func ActivateListenAndServeTLS(srv *http.Server, sockno int, certFile, keyFile s
 	}
 }
 
-func getActivatedPort(sockno int) string {
+func GetActivatedPort(sockno int) string {
 	activatedAddr := activatedSockets[sockno].Addr().String()
 	_, port, err := net.SplitHostPort(activatedAddr)
 	if err != nil {
@@ -84,8 +84,8 @@ func getActivatedPort(sockno int) string {
 	return port
 }
 
-func useActivatedPort(staticURL string, sockno int) string {
-	port := getActivatedPort(sockno)
+func UseActivatedPort(staticURL string, sockno int) string {
+	port := GetActivatedPort(sockno)
 
 	static, err := url.Parse(staticURL)
 	host, _, err := net.SplitHostPort(static.Host)
