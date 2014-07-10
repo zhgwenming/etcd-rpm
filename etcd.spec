@@ -28,6 +28,7 @@ sed -i "s/^\(VER=\).*HEAD)/\1%{version}/" ./scripts/release-version
 #%patch1 -p1 -b .systemd-activation
 
 %build
+export GOPATH=%{gopath}
 ./build
 
 %install
