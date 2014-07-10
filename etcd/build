@@ -6,7 +6,7 @@ if [ ! -h gopath/src/github.com/coreos/etcd ]; then
 fi
 
 export GOBIN=${PWD}/bin
-export GOPATH=${PWD}/gopath:$GOPATH
+export GOPATH=${PWD}/gopath
 export GOFMTPATH="./bench ./config ./discovery ./etcd ./error ./http ./log main.go ./metrics ./mod ./server ./store ./tests"
 
 # Don't surprise user by formatting their codes by stealth

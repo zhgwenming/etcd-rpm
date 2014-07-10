@@ -14,6 +14,7 @@ Patch1:		etcd-0001-feat-activation-add-socket-activation.patch
 
 BuildRequires:	golang
 BuildRequires:	systemd
+BuildRequires:	golang(github.com/coreos/go-systemd/activation) = 2-1.el7
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -28,7 +29,8 @@ sed -i "s/^\(VER=\).*HEAD)/\1%{version}/" ./scripts/release-version
 #%patch1 -p1 -b .systemd-activation
 
 %build
-export GOPATH=%{gopath}
+mkdir -p gopath/src/github.com/coreos
+ln -nsf %{gopath}/src/github.com/coreos/go-systemd gopath/src/github.com/coreos/go-systemd
 ./build
 
 %install

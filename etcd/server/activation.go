@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/tls"
 	"github.com/coreos/go-systemd/activation"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -13,12 +14,12 @@ var activatedSockets []net.Listener
 const expectedSockets = 2
 
 const (
-	etcdSock int = iota
-	raftSock
+	EtcdSock int = iota
+	RaftSock
 )
 
 func init() {
-	files := activation.Files()
+	files := activation.Files(false)
 	if files == nil || len(files) == 0 {
 		// no socket activation attempted
 		activatedSockets = nil
@@ -29,13 +30,13 @@ func init() {
 			var err error
 			activatedSockets[i], err = net.FileListener(f)
 			if err != nil {
-				fatal("socket activation failure: ", err)
+				log.Fatal("socket activation failure: ", err)
 			}
 		}
 	} else {
 		// socket activation attempted with incorrect number of sockets
 		activatedSockets = nil
-		fatalf("socket activation failure: %d sockets received, %d expected.", len(files), expectedSockets)
+		log.Fatalf("socket activation failure: %d sockets received, %d expected.", len(files), expectedSockets)
 	}
 }
 
@@ -79,7 +80,7 @@ func GetActivatedPort(sockno int) string {
 	activatedAddr := activatedSockets[sockno].Addr().String()
 	_, port, err := net.SplitHostPort(activatedAddr)
 	if err != nil {
-		fatal(err)
+		log.Fatal(err)
 	}
 	return port
 }
@@ -90,7 +91,7 @@ func UseActivatedPort(staticURL string, sockno int) string {
 	static, err := url.Parse(staticURL)
 	host, _, err := net.SplitHostPort(static.Host)
 	if err != nil {
-		fatal(err)
+		log.Fatal(err)
 	}
 
 	return (&url.URL{Host: net.JoinHostPort(host, port), Scheme: static.Scheme}).String()

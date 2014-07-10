@@ -74,11 +74,11 @@ func New(c *config.Config) *Etcd {
 
 	// Used socket activated port in advertised URLs, if applicable
 	if server.SocketActivated() {
-		c.Peer.Addr = server.UseActivatedPort(info.RaftURL, raftSock)
-		c.Addr = server.UseActivatedPort(info.EtcdURL, etcdSock)
+		c.Peer.Addr = server.UseActivatedPort(c.Peer.Addr, server.RaftSock)
+		c.Addr = server.UseActivatedPort(c.Addr, server.EtcdSock)
 
-		c.Peer.BindAddr = ":" + server.GetActivatedPort(raftSock)
-		c.BindAddr = ":" + server.GetActivatedPort(etcdSock)
+		c.Peer.BindAddr = ":" + server.GetActivatedPort(server.RaftSock)
+		c.BindAddr = ":" + server.GetActivatedPort(server.EtcdSock)
 	}
 
 	return &Etcd{
