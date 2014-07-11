@@ -1,7 +1,8 @@
-package server
+package etcd
 
 import (
 	"crypto/tls"
+	"github.com/coreos/etcd/server"
 	"github.com/coreos/go-systemd/activation"
 	"log"
 	"net"
@@ -93,4 +94,24 @@ func UseActivatedPort(hostport string, sockno int) string {
 	}
 
 	return host + ":" + port
+}
+
+func newActivatedListener(scheme string, cfg *tls.Config, sockno int) net.Listener {
+	sock := activatedSockets[sockno]
+
+	if scheme == "https" {
+		return tls.NewListener(sock, cfg)
+	} else {
+		return sock
+	}
+}
+
+// wrapper function
+func NewListener(scheme, addr string, cfg *tls.Config, sockno int) (listener net.Listener) {
+	if !SocketActivated() {
+		listener = server.NewListener(scheme, addr, cfg)
+	} else {
+		listener = newActivatedListener(scheme, cfg, sockno)
+	}
+	return
 }

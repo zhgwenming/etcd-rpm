@@ -72,13 +72,10 @@ func New(c *config.Config) *Etcd {
 		c = config.New()
 	}
 
-	// Used socket activated port in advertised URLs, if applicable
-	if server.SocketActivated() {
-		c.Peer.Addr = server.UseActivatedPort(c.Peer.Addr, server.RaftSock)
-		c.Addr = server.UseActivatedPort(c.Addr, server.EtcdSock)
-
-		c.Peer.BindAddr = ":" + server.GetActivatedPort(server.RaftSock)
-		c.BindAddr = ":" + server.GetActivatedPort(server.EtcdSock)
+	// Used socket activated port in bind addresses, if applicable
+	if SocketActivated() {
+		c.Peer.Addr = UseActivatedPort(c.Peer.Addr, RaftSock)
+		c.Addr = UseActivatedPort(c.Addr, EtcdSock)
 	}
 
 	return &Etcd{
@@ -269,7 +266,7 @@ func (e *Etcd) Run() {
 	standbyServerHTTPHandler := &ehttp.CORSHandler{e.StandbyServer.ClientHTTPHandler(), corsInfo}
 
 	log.Infof("etcd server [name %s, listen on %s, advertised url %s]", e.Server.Name, e.Config.BindAddr, e.Server.URL())
-	listener := server.NewListener(e.Config.EtcdTLSInfo().Scheme(), e.Config.BindAddr, etcdTLSConfig)
+	listener := NewListener(e.Config.EtcdTLSInfo().Scheme(), e.Config.BindAddr, etcdTLSConfig, EtcdSock)
 
 	e.server = &http.Server{Handler: &ModeHandler{e, serverHTTPHandler, standbyServerHTTPHandler},
 		ReadTimeout:  time.Duration(e.Config.HTTPReadTimeout) * time.Second,
@@ -277,7 +274,7 @@ func (e *Etcd) Run() {
 	}
 
 	log.Infof("peer server [name %s, listen on %s, advertised url %s]", e.PeerServer.Config.Name, e.Config.Peer.BindAddr, e.PeerServer.Config.URL)
-	peerListener := server.NewListener(e.Config.PeerTLSInfo().Scheme(), e.Config.Peer.BindAddr, peerTLSConfig)
+	peerListener := NewListener(e.Config.PeerTLSInfo().Scheme(), e.Config.Peer.BindAddr, peerTLSConfig, RaftSock)
 
 	e.peerServer = &http.Server{Handler: &ModeHandler{e, peerServerHTTPHandler, http.NotFoundHandler()},
 		ReadTimeout:  time.Duration(server.DefaultReadTimeout) * time.Second,
