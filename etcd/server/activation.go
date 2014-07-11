@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 )
 
 var activatedSockets []net.Listener
@@ -85,14 +84,13 @@ func GetActivatedPort(sockno int) string {
 	return port
 }
 
-func UseActivatedPort(staticURL string, sockno int) string {
+func UseActivatedPort(hostport string, sockno int) string {
 	port := GetActivatedPort(sockno)
 
-	static, err := url.Parse(staticURL)
-	host, _, err := net.SplitHostPort(static.Host)
+	host, _, err := net.SplitHostPort(hostport)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return (&url.URL{Host: net.JoinHostPort(host, port), Scheme: static.Scheme}).String()
+	return host + ":" + port
 }
